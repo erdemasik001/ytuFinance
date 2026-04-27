@@ -10,7 +10,6 @@ import {
     X,
     LogOut,
     ArrowRightLeft,
-    Bell,
     Sun,
     Moon
 } from 'lucide-react';
@@ -39,10 +38,20 @@ function useTheme() {
     return { theme, toggleTheme };
 }
 
+function useCurrentUser() {
+    try {
+        return JSON.parse(localStorage.getItem('currentUser') || '{}')
+    } catch {
+        return {}
+    }
+}
+
 const Sidebar = ({ isOpen, toggle }: { isOpen: boolean; toggle: () => void }) => {
     const navigate = useNavigate();
+    const user = useCurrentUser();
 
     const handleLogout = () => {
+        localStorage.removeItem('currentUser');
         navigate('/login');
     };
 
@@ -73,7 +82,7 @@ const Sidebar = ({ isOpen, toggle }: { isOpen: boolean; toggle: () => void }) =>
             >
                 <div className="h-24 flex items-center px-8 border-b border-gray-100/50 dark:border-slate-800/50">
                     <div>
-                        <span className="text-2xl font-bold text-[#cea14a] tracking-tight drop-shadow-sm">PLANAKS</span>
+                        <span className="text-2xl font-bold text-[#cea14a] tracking-tight drop-shadow-sm">YTU FINANCE</span>
                         <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 tracking-widest uppercase mt-1">ERP SYSTEM</p>
                     </div>
                     <button onClick={toggle} className="lg:hidden ml-auto text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
@@ -110,11 +119,11 @@ const Sidebar = ({ isOpen, toggle }: { isOpen: boolean; toggle: () => void }) =>
                     <div className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-2xl p-4 border border-gray-100 dark:border-slate-700 shadow-sm mb-4">
                         <div className="flex items-center gap-3 mb-3">
                             <div className="h-10 w-10 rounded-full bg-[#cea14a]/10 flex items-center justify-center text-[#cea14a] font-bold border border-[#cea14a]/20">
-                                EA
+                                {(user.username || 'U')[0].toUpperCase()}
                             </div>
                             <div>
-                                <p className="text-sm font-bold text-gray-900 dark:text-white">Erdem Aşık</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Yönetici</p>
+                                <p className="text-sm font-bold text-gray-900 dark:text-white">{user.username || 'Kullanıcı'}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{user.role === 'admin' ? 'Yönetici' : 'Kullanıcı'}</p>
                             </div>
                         </div>
                         <button
@@ -134,6 +143,7 @@ const Sidebar = ({ isOpen, toggle }: { isOpen: boolean; toggle: () => void }) =>
 export default function DashboardLayout() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const { theme, toggleTheme } = useTheme();
+    const currentUser = useCurrentUser();
 
     return (
         <div className="flex min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
@@ -149,7 +159,7 @@ export default function DashboardLayout() {
                         >
                             <Menu size={24} />
                         </button>
-                        <h2 className="text-lg font-semibold text-gray-800 dark:text-white hidden sm:block">Hoş Geldiniz, Erdem Bey 👋</h2>
+                        <h2 className="text-lg font-semibold text-gray-800 dark:text-white hidden sm:block">Hoş Geldiniz, {currentUser.username || 'Kullanıcı'} 👋</h2>
                     </div>
 
                     <div className="flex items-center gap-4">
@@ -158,10 +168,6 @@ export default function DashboardLayout() {
                             className="p-2.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100/80 dark:hover:bg-slate-800 rounded-xl transition-all hover:text-[#cea14a] dark:hover:text-[#cea14a]"
                         >
                             {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-                        </button>
-                        <button className="relative p-2.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100/80 dark:hover:bg-slate-800 rounded-xl transition-all hover:text-[#cea14a] dark:hover:text-[#cea14a] group">
-                            <Bell size={20} />
-                            <span className="absolute top-2.5 right-2.5 h-2 w-2 bg-red-500 rounded-full border border-white dark:border-slate-900 group-hover:scale-125 transition-transform" />
                         </button>
                     </div>
                 </header>

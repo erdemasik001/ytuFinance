@@ -22,6 +22,7 @@ export type PaymentStatus =
     | 'ÖDENMEDİ';
 
 export interface IncomingJob {
+    id: string;
     date: string;
     fileNo: string; // YYYYMMXXX
     customerName: string;
@@ -32,24 +33,35 @@ export interface IncomingJob {
     paymentStatus: PaymentStatus;
     note1?: string;
     note2?: string;
-    fileName: string; // generated
+    fileName: string;
 }
 
 export interface OutgoingJob {
+    id: string;
     date: string;
     fileNo: string;
     customerName: string;
     jobName: string;
     jobType: string;
     status: JobStatus;
-    saleAmount: number; // Cost usually? Or sale price? Context implies expense tracking.
+    saleAmount: number;
     paymentStatus: PaymentStatus;
     fee: number; // Harç ücreti
     note2?: string;
     note3?: string;
 }
 
+export interface User {
+    id: string;
+    username: string;
+    email: string;
+    password: string;
+    role: 'admin' | 'user';
+    createdAt: string;
+}
+
 export interface Invoice {
+    id: string;
     date: string;
     type: 'E-ARŞİV' | 'E-FATURA' | 'Z RAPORU';
     invoiceNo: string;
