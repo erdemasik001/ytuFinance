@@ -26,5 +26,9 @@ dist-ssr
 # Local data (contains user credentials)
 data/
 
+# Environment variables (contains Supabase keys)
+.env
+.env.local
+
 # Claude Code internals
 .claude/

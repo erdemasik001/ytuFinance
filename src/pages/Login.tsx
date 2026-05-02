@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Lock, Mail, User, X, KeyRound } from 'lucide-react';
+import { authLogin, authRegister, authResetPassword } from '../lib/api';
 
 function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
     const [email, setEmail] = useState('');
-    const [newPassword, setNewPassword] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -14,19 +14,10 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
         setError('');
         setLoading(true);
         try {
-            const res = await fetch('/api/auth/reset-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, newPassword }),
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                setError(data.error || 'İşlem başarısız');
-                return;
-            }
+            await authResetPassword(email);
             setSuccess(true);
-        } catch {
-            setError('Sunucuya bağlanılamadı');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'İşlem başarısız');
         } finally {
             setLoading(false);
         }
@@ -44,13 +35,13 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
                         <KeyRound size={24} className="text-white" />
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Şifre Sıfırla</h2>
-                    <p className="text-gray-500 mt-1 text-sm font-medium">E-posta ve yeni şifrenizi girin</p>
+                    <p className="text-gray-500 mt-1 text-sm font-medium">E-postanıza sıfırlama bağlantısı gönderilecek</p>
                 </div>
                 {success ? (
                     <div className="text-center py-6">
                         <div className="text-4xl mb-4">✓</div>
-                        <p className="text-green-600 font-bold text-lg">Şifre güncellendi!</p>
-                        <p className="text-gray-500 text-sm mt-2">Yeni şifrenizle giriş yapabilirsiniz.</p>
+                        <p className="text-green-600 font-bold text-lg">E-posta gönderildi!</p>
+                        <p className="text-gray-500 text-sm mt-2">Gelen kutunuzdaki bağlantıya tıklayarak şifrenizi sıfırlayabilirsiniz.</p>
                         <button onClick={onClose} className="mt-6 w-full bg-[#cea14a] hover:bg-[#b0883b] text-white py-3 rounded-2xl font-bold transition-colors">
                             Giriş Sayfasına Dön
                         </button>
@@ -66,19 +57,10 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
                                     placeholder="ornek@ytufinance.com" />
                             </div>
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Yeni Şifre</label>
-                            <div className="relative group">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#cea14a] transition-colors" size={20} />
-                                <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} required
-                                    className="w-full pl-12 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-[#cea14a]/10 focus:border-[#cea14a]/50 outline-none transition-all font-medium text-gray-700 placeholder:text-gray-400"
-                                    placeholder="••••••••" />
-                            </div>
-                        </div>
                         {error && <p className="text-sm text-red-500 font-medium text-center">{error}</p>}
                         <button type="submit" disabled={loading}
                             className="w-full bg-[#cea14a] hover:bg-[#b0883b] disabled:opacity-60 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-[#cea14a]/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2 group">
-                            <span>{loading ? 'Güncelleniyor...' : 'Şifreyi Sıfırla'}</span>
+                            <span>{loading ? 'Gönderiliyor...' : 'Sıfırlama E-postası Gönder'}</span>
                             <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
                         </button>
                     </form>
@@ -101,19 +83,10 @@ function RegisterModal({ onClose }: { onClose: () => void }) {
         setError('');
         setLoading(true);
         try {
-            const res = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, password }),
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                setError(data.error || 'Kayıt başarısız');
-                return;
-            }
+            await authRegister(username, email, password);
             setSuccess(true);
-        } catch {
-            setError('Sunucuya bağlanılamadı');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Kayıt başarısız');
         } finally {
             setLoading(false);
         }
@@ -204,7 +177,7 @@ function RegisterModal({ onClose }: { onClose: () => void }) {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-[#cea14a] hover:bg-[#b0883b] disabled:opacity-60 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-[#cea14a]/30 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2 group"
+                            className="w-full bg-[#cea14a] hover:bg-[#b0883b] disabled:opacity-60 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-[#cea14a]/30 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 group"
                         >
                             <span>{loading ? 'Kaydediliyor...' : 'Kayıt Ol'}</span>
                             <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
@@ -230,20 +203,10 @@ export default function Login() {
         setError('');
         setLoading(true);
         try {
-            const res = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                setError(data.error || 'Giriş başarısız');
-                return;
-            }
-            localStorage.setItem('currentUser', JSON.stringify(data));
+            await authLogin(email, password);
             navigate('/');
-        } catch {
-            setError('Sunucuya bağlanılamadı');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Giriş başarısız');
         } finally {
             setLoading(false);
         }
