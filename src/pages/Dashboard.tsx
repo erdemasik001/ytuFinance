@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     TrendingUp, TrendingDown, Wallet, AlertCircle,
-    Calendar, ArrowUpRight, ArrowDownRight
+    Calendar, ArrowUpRight, ArrowDownRight, Package
 } from 'lucide-react';
-import type { IncomingJob, OutgoingJob } from '../types';
+import type { IncomingJob, OutgoingJob, Product } from '../types';
 import { cn } from '../lib/utils';
 import { getAll } from '../lib/api';
 
@@ -40,15 +40,18 @@ export default function Dashboard() {
     const navigate = useNavigate();
     const [gelenIsler, setGelenIsler] = useState<IncomingJob[]>([]);
     const [gidenIsler, setGidenIsler] = useState<OutgoingJob[]>([]);
+    const [lowStockProducts, setLowStockProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         Promise.all([
             getAll<IncomingJob>('gelen-isler'),
             getAll<OutgoingJob>('giden-isler'),
-        ]).then(([gelen, giden]) => {
+            getAll<Product>('urunler').catch(() => []),
+        ]).then(([gelen, giden, products]) => {
             setGelenIsler(gelen);
             setGidenIsler(giden);
+            setLowStockProducts(products.filter(p => p.minStock > 0 && p.currentStock < p.minStock));
             setLoading(false);
         });
     }, []);
@@ -102,6 +105,32 @@ export default function Dashboard() {
                     colorClass="bg-blue-600"
                 />
             </div>
+
+            {lowStockProducts.length > 0 && (
+                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-lg shadow-blue-900/5 dark:shadow-blue-900/10 border border-amber-200 dark:border-amber-700/50 p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2.5 rounded-2xl bg-amber-100 dark:bg-amber-500/10">
+                            <Package size={20} className="text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div>
+                            <h2 className="font-bold text-gray-900 dark:text-white">Düşük Stok Uyarısı</h2>
+                            <p className="text-sm text-gray-500 dark:text-slate-400">{lowStockProducts.length} ürün minimum seviyenin altında</p>
+                        </div>
+                        <button onClick={() => navigate('/urunler')} className="ml-auto px-4 py-2 bg-gray-50 hover:bg-gray-100 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-600 dark:text-slate-300 text-sm font-semibold rounded-xl transition-colors">
+                            Stok Yönetimi
+                        </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {lowStockProducts.slice(0, 6).map(p => (
+                            <div key={p.id} className="flex items-center gap-2 px-3 py-2 bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-amber-100 dark:border-amber-500/20">
+                                <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">{p.name}</span>
+                                <span className="text-xs text-amber-600 dark:text-amber-400">{p.currentStock}/{p.minStock} {p.unit}</span>
+                            </div>
+                        ))}
+                        {lowStockProducts.length > 6 && <span className="px-3 py-2 text-xs text-gray-400">+{lowStockProducts.length - 6} daha</span>}
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-lg shadow-blue-900/5 dark:shadow-blue-900/10 border border-gray-100 dark:border-slate-700/50 p-8 card-hover">

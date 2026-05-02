@@ -62,12 +62,15 @@ export default function SummaryTable({ type }: SummaryProps) {
                     });
                 }
                 const row = map.get(job.customerName)!;
-                row.months[monthIdx] += job.saleAmount;
-                row.total += job.saleAmount;
+                // Gider icmalinde harç ücreti de toplama dahil ediliyor
+                const fee = type === 'GİDER' ? ((job as OutgoingJob).fee || 0) : 0;
+                const amount = job.saleAmount + fee;
+                row.months[monthIdx] += amount;
+                row.total += amount;
                 if (job.paymentStatus === 'ÖDEME ALINDI') {
-                    row.paid += job.saleAmount;
+                    row.paid += amount;
                 } else {
-                    row.debt += job.saleAmount;
+                    row.debt += amount;
                 }
             }
             setRows(Array.from(map.values()));

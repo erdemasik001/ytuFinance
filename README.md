@@ -7,12 +7,18 @@ Küçük ve orta ölçekli işletmeler için geliştirilmiş, dosya tabanlı, ku
 ## Özellikler
 
 - **Çoklu kullanıcı desteği** — Her kullanıcının verileri birbirinden izole klasörlerde tutulur
-- **Gelen / Giden iş takibi** — İş durumu, ödeme durumu, dosya numarası
-- **Fatura yönetimi** — E-Arşiv, E-Fatura, Z Raporu; KDV otomatik hesaplanır
+- **Gelen / Giden iş takibi** — İş durumu, ödeme durumu, dosya numarası; düzenleme, silme, toplu işlem
+- **Fatura yönetimi** — E-Arşiv, E-Fatura, Z Raporu; KDV otomatik hesaplanır; yazdırma desteği
 - **Gelir & Gider İcmal tablosu** — Müşteri bazlı yıllık döküm, CSV/Excel export
-- **Dışa aktarım** — Tüm tablolar CSV olarak indirilebilir
+- **Firma Yönetimi** — Vergi no, adres, sektör bilgileriyle tam CRUD
+- **Cari Hesaplar** — Müşteri, tedarikçi veya her ikisi tipinde cari kayıt yönetimi
+- **Banka & Kasa** — Banka hesabı ve kasa takibi; anlık bakiye hesaplama; GİRİŞ/ÇIKIŞ işlemleri
+- **Stok & Ürünler** — Ürün kataloğu, stok hareketleri (GİRİŞ/ÇIKIŞ/SAYIM), düşük stok uyarısı
+- **Raporlamalar** — Kâr-Zarar, KDV, Fatura, Stok, Banka/Kasa raporları; interaktif grafikler; CSV export
+- **Sayfalama** — Tüm listelerde 15'li sayfalama ve akıllı sayfa numaralandırma
+- **Dışa aktarım** — Tüm tablolar CSV olarak indirilebilir; faturalar yazdırılabilir
 - **Karanlık / Aydınlık tema** — Elle değiştirilebilir, tercih tarayıcıda saklanır
-- **Kullanıcı kimlik doğrulama** — Kayıt, giriş, şifre sıfırlama
+- **Kullanıcı kimlik doğrulama** — Kayıt, giriş, şifre sıfırlama; route bazlı erişim koruması
 
 ---
 
@@ -24,6 +30,7 @@ Küçük ve orta ölçekli işletmeler için geliştirilmiş, dosya tabanlı, ku
 | Stil | Tailwind CSS v4 |
 | Bundler | Vite 7 |
 | Routing | React Router v7 |
+| Grafikler | Recharts |
 | API / Veri | Vite eklentisi + Node.js `fs` (dosya tabanlı) |
 | İkonlar | Lucide React |
 
@@ -60,15 +67,19 @@ Uygulama varsayılan olarak `http://localhost:5173` adresinde çalışır.
 
 ```
 data/
-├── kullanicilar.txt        ← Tüm kullanıcı hesapları (global)
+├── kullanicilar.txt              ← Tüm kullanıcı hesapları (global)
 ├── admin/
 │   ├── gelen-isler.txt
 │   ├── giden-isler.txt
-│   └── faturalar.txt
+│   ├── faturalar.txt
+│   ├── firmalar.txt
+│   ├── cariler.txt
+│   ├── banka-hesaplari.txt
+│   ├── islemler.txt
+│   ├── urunler.txt
+│   └── stok-hareketleri.txt
 └── <kullanici-adi>/
-    ├── gelen-isler.txt
-    ├── giden-isler.txt
-    └── faturalar.txt
+    └── (aynı dosya yapısı)
 ```
 
 Her kullanıcı kayıt olduğunda kendi klasörü otomatik oluşturulur ve boş veri dosyaları eklenir. Bir kullanıcının verileri diğerine görünmez.
@@ -100,7 +111,7 @@ Tüm CRUD işlemleri `/api/{kullanici-adi}/{kaynak}` şemasını izler:
 | `PUT` | `/api/{user}/{kaynak}/{id}` | Kayıt güncelle |
 | `DELETE` | `/api/{user}/{kaynak}/{id}` | Kayıt sil |
 
-**Kaynak adları:** `gelen-isler`, `giden-isler`, `faturalar`
+**Kaynak adları:** `gelen-isler`, `giden-isler`, `faturalar`, `firmalar`, `cariler`, `banka-hesaplari`, `islemler`, `urunler`, `stok-hareketleri`
 
 Giriş yapan kullanıcının adı `localStorage`'da tutulur; `src/lib/api.ts` her istekte bunu okuyarak doğru klasöre yönlenir.
 
@@ -109,26 +120,50 @@ Giriş yapan kullanıcının adı `localStorage`'da tutulur; `src/lib/api.ts` he
 ## Sayfalar
 
 ### Ana Sayfa (`/`)
-Toplam gelir, gider ve net bakiye kartları. Bekleyen ödemeler ve son işlemlerin özeti. "Tümünü Gör" butonları ilgili sayfaya yönlendirir.
+Toplam gelir, gider ve net bakiye kartları. Düşük stok uyarı bandı. Bekleyen ödemeler ve son işlemlerin özeti.
 
 ### Gelen İşler (`/gelen-isler`)
-Müşterilerden alınan işlerin listesi. Durum ve ödeme durumuna göre filtreleme. Yeni iş ekleme modalı.
+Müşterilerden alınan işlerin listesi. Durum ve ödeme durumuna göre filtreleme. Düzenleme, silme, toplu silme ve sayfalama desteği.
 
 **İş tipleri:** EKB ÇİZİM VE ONAYI, EKB ÇİZİMİ, EKB ONAYI, ÖN HESAP SONUÇ FORMU, AKUSTİK RAPOR & PROJE, 3BSYM
 
 **İş durumları:** TESLİM EDİLDİ, DEVAM EDİYOR, İPTAL EDİLDİ, BEKLEMEDE
 
 ### Giden İşler (`/giden-isler`)
-Dışarıya verilen veya taşere edilen işler. Harç ücreti alanı dahil.
+Dışarıya verilen veya taşere edilen işler. Harç ücreti alanı dahil. Düzenleme, silme ve toplu işlem desteği.
 
 ### Faturalar (`/faturalar`)
-E-Arşiv, E-Fatura ve Z Raporu takibi. Hizmet bedeli girildiğinde KDV otomatik hesaplanır. Tip ve ödeme durumuna göre filtre, CSV dışa aktarım.
+E-Arşiv, E-Fatura ve Z Raporu takibi. Hizmet bedeli girildiğinde KDV otomatik hesaplanır. Yazdırma, düzenleme, toplu silme, CSV dışa aktarım.
 
 ### Gelir İcmal (`/gelir-icmal`)
-Gelen işlerin müşteri bazında aylık dökümü. Yıl seçimi, toplam / alınan / kalan sütunları. CSV olarak Excel'e aktarılabilir.
+Gelen işlerin müşteri bazında aylık dökümü. Yıl seçimi, toplam / alınan / kalan sütunları. CSV export.
 
 ### Gider İcmal (`/gider-icmal`)
-Giden işlerin aynı formatta yıllık özeti.
+Giden işlerin aynı formatta yıllık özeti. Harç ücreti de gider hesabına dahil edilir.
+
+### Firmalar (`/firmalar`)
+İş yapılan firmaların tam CRUD yönetimi. Vergi no, vergi dairesi, ticaret sicil no, adres, sektör alanları. Ad ve vergi no ile arama.
+
+### Cari Hesaplar (`/cariler`)
+Müşteri, tedarikçi veya her ikisi tipiyle cari kayıt yönetimi. Tip filtresi ve renk kodlu rozet gösterimi.
+
+### Banka & Kasa (`/banka-kasa`)
+Banka hesabı ve kasa tanımları. TRY/USD/EUR para birimi desteği. Başlangıç bakiyesi + GİRİŞ/ÇIKIŞ işlemleriyle anlık bakiye hesaplama. İşlem geçmişi tablosu ve sayfalama.
+
+### Stok & Ürünler (`/urunler`)
+Ürün kataloğu (satış/alış fiyatı, birim, barkod, minimum stok). Stok hareketleri: GİRİŞ, ÇIKIŞ ve SAYIM tipleri. Stok seviyesi görsel barı. Düşük stok uyarı bandı.
+
+### Raporlamalar (`/raporlar`)
+
+5 sekmeli raporlama modülü, tüm verilerden otomatik olarak hesaplanır:
+
+| Sekme | İçerik |
+|---|---|
+| **Kâr-Zarar** | Aylık gelir/gider bar grafiği, net kâr çizgi grafiği, yıl karşılaştırma, CSV export |
+| **KDV Raporu** | KDV oranına göre yığılmış bar grafik, aylık KDV tablosu, CSV export |
+| **Fatura Raporu** | Aylık tutar bar grafiği, ödeme durumu pasta grafiği, fatura tip özeti |
+| **Stok Raporu** | Kategori bazlı pasta grafik, stok tablosu, düşük stok listesi, CSV export |
+| **Banka/Kasa** | Hesap bakiye kartları, aylık nakit akış bar grafiği, net nakit çizgi grafiği, CSV export |
 
 ---
 

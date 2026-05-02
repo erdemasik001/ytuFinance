@@ -11,7 +11,12 @@ import {
     LogOut,
     ArrowRightLeft,
     Sun,
-    Moon
+    Moon,
+    Building2,
+    Users,
+    Landmark,
+    Package,
+    BarChart3
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -62,6 +67,11 @@ const Sidebar = ({ isOpen, toggle }: { isOpen: boolean; toggle: () => void }) =>
         { to: '/gider-icmal', icon: TrendingDown, label: 'GİDER İCMAL' },
         { to: '/gelen-isler', icon: Briefcase, label: 'GELEN İŞLER' },
         { to: '/giden-isler', icon: ArrowRightLeft, label: 'GİDEN İŞLER' },
+        { to: '/firmalar', icon: Building2, label: 'FİRMALAR' },
+        { to: '/cariler', icon: Users, label: 'CARİ HESAPLAR' },
+        { to: '/banka-kasa', icon: Landmark, label: 'BANKA & KASA' },
+        { to: '/urunler', icon: Package, label: 'STOK & ÜRÜNLER' },
+        { to: '/raporlar', icon: BarChart3, label: 'RAPORLAR' },
     ];
 
     return (
