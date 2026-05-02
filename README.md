@@ -101,33 +101,26 @@ Her tablo `user_id UUID` alanı içerir. **Row Level Security (RLS)** politikala
 
 ## Kurulum ve Çalıştırma
 
-### 1. Depoyu klonlayın
-
-```bash
-git clone https://github.com/erdemasik001/ytuFinance.git
-cd ytuFinance
-```
-
-### 2. Bağımlılıkları yükleyin
+### 1. Bağımlılıkları yükleyin
 
 ```bash
 npm install
 ```
 
-### 3. Supabase ayarlarını yapın
+### 2. Supabase ayarlarını yapın
 
 1. [supabase.com](https://supabase.com) → **New project** ile yeni proje oluşturun
 2. **Authentication → Sign In / Providers → Email** altında **"Confirm email"** seçeneğini **kapatın**
 3. `supabase/schema.sql` dosyasını SQL Editor'da çalıştırın (bkz. Veritabanı Kurulumu)
 
-### 4. Ortam değişkenlerini tanımlayın
+### 3. Ortam değişkenlerini tanımlayın
 
 ```bash
 cp .env.example .env
 # .env dosyasını açıp VITE_SUPABASE_URL ve VITE_SUPABASE_ANON_KEY değerlerini doldurun
 ```
 
-### 5. Geliştirme sunucusunu başlatın
+### 4. Geliştirme sunucusunu başlatın
 
 ```bash
 npm run dev
